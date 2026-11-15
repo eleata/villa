@@ -1,0 +1,26 @@
+# villa 97fb9336c + patch 0001; Lasagna venv installed by the patched bootstrap; data: public PHerc0826 Lasagna channels
+# (volume 20250821151701), grad_mag OME-Zarr level 2, z 10000-11000 fullres; container: vc3d image, --network none, CPU only
+$ cd /work/villa-after/lasagna
+$ .venv-verif-201145/bin/python scripts/zarr_threshold_masks.py create /work/data/PHerc0826/lasagna/PHerc0826_grad_mag.ome.zarr --array 2 --z-range 10000,11000 --device cpu --zarr-output /work/run/keep_mask.zarr -o /work/run/vis
+[mask] zarr=/work/data/PHerc0826/lasagna/PHerc0826_grad_mag.ome.zarr/2 shape=(4230, 2043, 2043) chunks=(32, 32, 32) dtype=uint8 scale_zyx=(4.0, 4.0, 4.0) z_range_full=(10000, 11000) z_range_array=(2500, 2750) device=cpu
+[mask] marked 26160 missing zarr chunks as empty
+[mask] masked_out_frac=0.8589 keep_frac=0.1411 read=652.7ms mask=198434.6ms zarr=3641.5ms previews=352.1ms total=203886.5ms
+[mask] wrote zarr mask to /work/run/keep_mask.zarr (255=keep, 0=mask_out)
+[mask] wrote 1 JPG previews to /work/run/vis/jpg
+[mask] wrote 1 layered TIFF previews to /work/run/vis/tif
+[exit code: 0; wall time 206.5 s; 2026-11-15T01:53:00Z -> 2026-11-15T01:56:27Z]
+$ .venv-verif-201145/bin/python summarize_mask.py /work/run /work/data/PHerc0826/lasagna/PHerc0826_grad_mag.ome.zarr/2
+mask_shape_zyx_level2: [250, 2043, 2043]
+mask_values: [0, 255]
+voxels: 1043462250
+keep_voxels: 147234439
+keep_frac: 0.1411
+voxels_in_downloaded_chunks: 211156992
+keep_frac_within_downloaded_chunks: 0.6973
+grad_mag_mean_kept: 103.65
+grad_mag_mean_masked_within_downloaded: 29.49
+grad_mag_nonzero_frac_kept: 1.0
+kept_bbox_fullres_zyx: {"z": [10000, 10999], "y": [3208, 6451], "x": [220, 7159]}
+keep_mask_zarr_files: 6403
+keep_mask_zarr_sha256_tree: "5edbe0e123ff7926c6bb59dc4bff720f4dd0c7e1657d4072b2355936df167ada"
+[exit code: 0]

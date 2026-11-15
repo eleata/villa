@@ -1,0 +1,36 @@
+# villa 97fb9336c, unpatched; run inside the vc3d image; everything after the command is the captured log
+$ cd /work/villa-before/lasagna
+$ uv python install 3.14 && uv venv --python 3.14 .venv && .venv/bin/python scripts/bootstrap_venv.py --venv .venv --backend cu130
+warning: Failed to install executable for cpython-3.14.10-linux-aarch64-gnu
+  cause: Failed to create directory for Python executable link
+  cause: failed to create directory `/work/user/.local/bin`: Permission denied (os error 13)
+Using CPython 3.14.10
+Creating virtual environment at: .venv
+Activate with: source .venv/bin/activate
+PyTorch backend: cu130 (selected explicitly)
+[... 56 lines omitted: torch, volume-cartographer, vc_reader and vc_object_store install fine; full output in ../before.log ...]
+$ /usr/local/bin/uv pip install --python /work/villa-before/lasagna/.venv/bin/python -e /work/villa-before/lasagna
+error: No solution found when resolving dependencies
+  cause: Because villa-gpu-manager was not found in the package registry and vesuvius-lasagna==0.0.1 depends on villa-gpu-manager, we can conclude that vesuvius-lasagna==0.0.1 cannot be used.
+         And because only vesuvius-lasagna==0.0.1 is available and you require vesuvius-lasagna, we can conclude that your requirements are unsatisfiable.
+Traceback (most recent call last):
+  File "/work/villa-before/lasagna/scripts/bootstrap_venv.py", line 443, in <module>
+    raise SystemExit(main())
+                     ~~~~^^
+  File "/work/villa-before/lasagna/scripts/bootstrap_venv.py", line 422, in main
+    run(
+    ~~~^
+        [uv, "pip", "install", "--python", str(venv_python), "-e", str(project)],
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        dry_run=args.dry_run,
+        ^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/work/villa-before/lasagna/scripts/bootstrap_venv.py", line 212, in run
+    subprocess.run(command, check=True, env=environment)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/work/tools/python/cpython-3.14.10-linux-aarch64-gnu/lib/python3.14/subprocess.py", line 578, in run
+    raise CalledProcessError(retcode, process.args,
+                             output=stdout, stderr=stderr)
+subprocess.CalledProcessError: Command '['/usr/local/bin/uv', 'pip', 'install', '--python', '/work/villa-before/lasagna/.venv/bin/python', '-e', '/work/villa-before/lasagna']' returned non-zero exit status 1.
+[exit code: 1]

@@ -1,0 +1,83 @@
+{
+ "patch": "0001-lasagna-bootstrap-install-gpu-manager.patch",
+ "villa_commit": "97fb9336c8898be27e78eff8cd23ce5e7185ec0a",
+ "machine": "NVIDIA GB10 (aarch64, 124 GB unified memory), Ubuntu 24.04, driver 580, Docker 29.2",
+ "image": "built from volume-cartographer/Dockerfile at the same commit (runtime stage), arm64",
+ "provenance": {
+  "historical_evidence": "before.log, after.log and the before/after fields below come from one local run per case, made with a working script that is not part of this package. The logs are that output with host paths replaced by /work/... (and the wrapper's separator line translated to '== packages'); nothing else was edited.",
+  "verifier": "verify.sh was adapted from that script afterwards. It is NOT the script that produced the logs, and it has not been run end to end to regenerate them (it needs network and a GPU). Differences from the historical runs: verify.sh uses one venv name for both cases and passes --gpus all to both by default, and writes a JSON with a different layout. Its failure paths (patch not applying, unknown commit, reused output directory, single case, verdict false -> exit 1) were exercised with stubbed docker/uv, without network or GPU.",
+  "real_data_run": "evidence/after-real-data.txt: a separate run, after the patched install, of a Lasagna command on public PHerc0826 data (see real_data below)."
+ },
+ "before": {
+  "command": "cd lasagna && uv python install 3.14 && uv venv --python 3.14 .venv && .venv/bin/python scripts/bootstrap_venv.py --venv .venv --backend cu130",
+  "gpu_visible": false,
+  "exit_code": 1,
+  "start": "2026-11-14T22:46:54Z",
+  "end": "2026-11-14T22:54:26Z",
+  "tree": "no changes",
+  "error_lines": [
+   "error: No solution found when resolving dependencies",
+   "  cause: Because villa-gpu-manager was not found in the package registry and vesuvius-lasagna==0.0.1 depends on villa-gpu-manager, we can conclude that vesuvius-lasagna==0.0.1 cannot be used."
+  ],
+  "packages": [
+   "torch                  2.13.0+cu130"
+  ],
+  "log": "before.log"
+ },
+ "after": {
+  "command": "cd lasagna && uv python install 3.14 && uv venv --python 3.14 .venv-verif-201145 && .venv-verif-201145/bin/python scripts/bootstrap_venv.py --venv .venv-verif-201145 --backend cu130",
+  "gpu_visible": true,
+  "exit_code": 0,
+  "start": "2026-11-14T23:11:45Z",
+  "end": "2026-11-14T23:19:43Z",
+  "tree": "lasagna/scripts/bootstrap_venv.py | 9 +++++++++\n 1 file changed, 9 insertions(+)",
+  "error_lines": [],
+  "packages": [
+   "torch                                    2.13.0+cu130",
+   "vesuvius-lasagna                         0.0.1        /work/villa-after/lasagna",
+   "villa-gpu-manager                        0.1.0        /work/villa-after/gpu_manager"
+  ],
+  "log": "after.log"
+ },
+ "passes": true,
+ "real_data": {
+  "volume": "PHerc0826, volume 20250821151701 (public Lasagna channels: PHerc0826.lasagna.json, OME-Zarr level 2 of grad_mag, nx, ny; cos not downloaded)",
+  "crop": "fullres z 10000-11000 (level-2 z 2500-2750) over the whole level-2 xy plane; only 6608 of the slab's 32768 chunks were downloaded, all within fullres y 3200-6527, x 128-7167; the other 26160 are reported missing and masked by the tool",
+  "command": "cd lasagna && .venv-verif-201145/bin/python scripts/zarr_threshold_masks.py create <PHerc0826_grad_mag.ome.zarr> --array 2 --z-range 10000,11000 --device cpu --zarr-output keep_mask.zarr -o vis",
+  "environment": "vc3d image built at the same commit, docker --network none --memory 24g --cpus 8, CPU only",
+  "exit_code": 0,
+  "start": "2026-11-15T01:53:00Z",
+  "end": "2026-11-15T01:56:27Z",
+  "wall_seconds": 206.5,
+  "outputs": "keep_mask.zarr (uint8, 250x2043x2043, 6403 chunk files, 63 MB with previews), 1 JPG and 1 layered TIFF preview; not included here (derived from scroll data)",
+  "summary": {
+   "keep_frac": 0.1411,
+   "keep_frac_within_downloaded_chunks": 0.6973,
+   "grad_mag_mean_kept": 103.65,
+   "grad_mag_mean_masked_within_downloaded": 29.49,
+   "kept_bbox_fullres_zyx": {
+    "z": [
+     10000,
+     10999
+    ],
+    "y": [
+     3208,
+     6451
+    ],
+    "x": [
+     220,
+     7159
+    ]
+   },
+   "keep_mask_zarr_sha256_tree": "5edbe0e123ff7926c6bb59dc4bff720f4dd0c7e1657d4072b2355936df167ada"
+  },
+  "not_run": "fit.py was tried first (--device cpu, --seed 3500 4700 10500, cylinder init, on a copy of the manifest whose umbilicus_json points at the published PHerc0826 umbilicus file, since the published manifest leaves it empty): on CPU it stops at fit_data.load_3d_streaming -> SparseChunkGroupCache, which creates a torch.cuda.Stream (ValueError: Expected a cuda device, but got: cpu). cyl_init_tool.py loads data through the same function (read in the code, not run). Both need a CUDA GPU, which was not available for this run."
+ },
+ "scope": "one run without the change and one with it, on one aarch64 machine. Not repeated three times, and the after-case was not re-run on x86_64.",
+ "notes": [
+  "The 'before' run had no GPU visible in the container. It fails while resolving dependencies, before the bootstrap's final CUDA check, so GPU visibility does not affect its result.",
+  "A first 'after' run without a visible GPU installed every package (including villa-gpu-manager) and exited 1 only because of the bootstrap's final CUDA check; after.log is the repeat with a GPU visible. That first log is not included.",
+  "The before run named its venv .venv and the after run .venv-verif-201145; the rest of the command is identical.",
+  "Timestamps converted to UTC."
+ ]
+}
